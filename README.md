@@ -1,3 +1,3 @@
 # World Cup Feed
 
-Add-on that adds a World Cup feed to you Firefox for Android homepage.
+Add-on for Firefox for Android that adds a World Cup feed to your home page.
