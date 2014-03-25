@@ -70,40 +70,19 @@ function optionsCallback() {
   };
 }
 
-// An example XHR request to fetch data for panel.
-function fetchData(url, onFinish) {
-  let xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Ci.nsIXMLHttpRequest);
-  try {
-    xhr.open("GET", url, true);
-  } catch (e) {
-    Cu.reportError("Error opening request to " + url + ": " + e);
-    return;
-  }
-  xhr.onerror = function onerror(e) {
-    Cu.reportError("Error making request to " + url + ": " + e.error);
-  };
-  xhr.onload = function onload(event) {
-    if (xhr.status === 200) {
-      onFinish(xhr.responseText);
-    } else {
-      Cu.reportError("Request to " + url + " returned status " + xhr.status);
-    }
-  };
-  xhr.send(null);
-}
-
 function refreshDataset() {
   // XXX: Actually choose a feed based on the user's country, falling back to locale.
   // Allow the user to override this with a setting.
   let feedUrl = gFeedUrls.US;
 
-  fetchData(feedUrl, function(response) {
+  FeedHelper.parseFeed(feedUrl, function(parsedFeed) {
+    let items = FeedHelper.feedToItems(parsedFeed);
+
     Task.spawn(function() {
-      let items = JSON.parse(response);
       let storage = HomeProvider.getStorage(DATASET_ID);
       yield storage.deleteAll();
       yield storage.save(items);
-    }).then(null, e => Cu.reportError("Error refreshing dataset " + DATASET_ID + ": " + e));
+    }).then(null, e => Cu.reportError("Error saving data to HomeProvider: " + e));
   });
 }
 
