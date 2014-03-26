@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <setting title="Country" type="control">
+    <menulist id="country">
+      <menupopup>
+        <menuitem value="US" label="United States"/>
+        <menuitem value="FR" label="France"/>
+      </menupopup>
+    </menulist>
+  </setting>
+</vbox>

@@ -1,11 +1,13 @@
 const { classes: Cc, interfaces: Ci, utils: Cu } = Components;
 
+Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/Home.jsm");
 Cu.import("resource://gre/modules/HomeProvider.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/Task.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+const ADDON_ID = "world.cup.feed@mozilla.org";
 const PANEL_ID = "world.cup.feed.panel@mozilla.org";
 const DATASET_ID = "world.cup.feed.dataset@mozilla.org";
 
@@ -92,6 +94,20 @@ function deleteDataset() {
   }).then(null, e => Cu.reportError("Error deleting data from HomeProvider: " + e));
 }
 
+function observe(doc, topic, id) {
+  if (id != ADDON_ID) {
+    return;
+  }
+
+  let country = doc.getElementById("country");
+
+  country.addEventListener("command", function(){
+    Services.console.logStringMessage("******** command: " + country.value);
+  }, false);
+
+  country.value = "FR";
+}
+
 /**
  * bootstrap.js API
  * https://developer.mozilla.org/en-US/Add-ons/Bootstrapped_extensions
@@ -114,6 +130,8 @@ function startup(data, reason) {
 
   // Update data once every hour.
   HomeProvider.addPeriodicSync(DATASET_ID, 3600, refreshDataset);
+
+  Services.obs.addObserver(observe, AddonManager.OPTIONS_NOTIFICATION_DISPLAYED, false);
 }
 
 function shutdown(data, reason) {
@@ -123,6 +141,8 @@ function shutdown(data, reason) {
   }
 
   Home.panels.unregister(PANEL_ID);
+
+  Services.obs.removeObserver(observe, AddonManager.OPTIONS_NOTIFICATION_DISPLAYED);
 }
 
 function install(data, reason) {}
