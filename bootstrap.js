@@ -114,7 +114,8 @@ function optionsCallback() {
   };
 }
 
-const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([a-zA-Z0-9]+)((?:\/[a-zA-Z0-9]+)+)\/([0-9]+).*$/;
+//const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([a-zA-Z0-9]+)((?:\/[a-zA-Z0-9]+)+)\/([0-9]+).*$/;
+const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([-_a-zA-Z0-9]+)((?:\/[-_a-zA-Z0-9]+)+)\/([0-9]+).*$/;
 
 /**
  * Takes a desktop goal.com URL and converts it into a mobile URL.
@@ -217,6 +218,7 @@ function startup(data, reason) {
 function shutdown(data, reason) {
   if (reason == ADDON_UNINSTALL || reason == ADDON_DISABLE) {
     Home.panels.uninstall(PANEL_ID);
+    HomeProvider.removePeriodicSync(DATASET_ID);
     deleteDataset();
   }
 
