@@ -131,6 +131,7 @@ function mobilifyUrl(url) {
     return "http://m." + match[2] + "/s/" + match[3] + "/" + match[4] + "/" + match[6] + "/";
   } catch (e) {
     // If anything goes wrong, just return the original URL.
+    Cu.reportError("Error converting item URL to mobile version: " + url);
     return url;
   }
 }
@@ -142,9 +143,7 @@ function refreshDataset() {
   FeedHelper.parseFeed(feedUrl, function(parsedFeed) {
     let items = FeedHelper.feedToItems(parsedFeed).map(function(item){
       // Hack: Convert URL into its mobile version.
-      Services.console.logStringMessage("***** before: " + item.url);
       item.url = mobilifyUrl(item.url);
-      Services.console.logStringMessage("***** after: " + item.url);
       return item;
     });
 
