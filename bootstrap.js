@@ -114,12 +114,39 @@ function optionsCallback() {
   };
 }
 
+const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([a-zA-Z0-9]+)((?:\/[a-zA-Z0-9]+)+)\/([0-9]+).*$/;
+
+/**
+ * Takes a desktop goal.com URL and converts it into a mobile URL.
+ *   e.g. "http://www.goal.com/en-us/news/88/spain/2014/03/27/4713470/del-bosque-silent-on-valdes-replacement"
+ *   becomes "http://m.goal.com/s/en-us/news/4713470"
+ *
+ * url.match(REGEX) returns an array like this:
+ * [ "http://www.goal.com/en-us/news/88/spain/2014/03/27/4713470/del-bosque-silent-on-valdes-replacement",
+ *   "www.", "goal.com", "en-us", "news", "/88/spain/2014/03/27", "4713470" ]
+ */
+function mobilifyUrl(url) {
+  try {
+    let match = url.match(REGEX);
+    return "http://m." + match[2] + "/s/" + match[3] + "/" + match[4] + "/" + match[6] + "/";
+  } catch (e) {
+    // If anything goes wrong, just return the original URL.
+    return url;
+  }
+}
+
 function refreshDataset() {
   let code = getCountryCode();
   let feedUrl = Countries[code].feed;
 
   FeedHelper.parseFeed(feedUrl, function(parsedFeed) {
-    let items = FeedHelper.feedToItems(parsedFeed);
+    let items = FeedHelper.feedToItems(parsedFeed).map(function(item){
+      // Hack: Convert URL into its mobile version.
+      Services.console.logStringMessage("***** before: " + item.url);
+      item.url = mobilifyUrl(item.url);
+      Services.console.logStringMessage("***** after: " + item.url);
+      return item;
+    });
 
     Task.spawn(function() {
       let storage = HomeProvider.getStorage(DATASET_ID);
