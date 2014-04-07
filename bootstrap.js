@@ -114,7 +114,6 @@ function optionsCallback() {
   };
 }
 
-//const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([a-zA-Z0-9]+)((?:\/[a-zA-Z0-9]+)+)\/([0-9]+).*$/;
 const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([-_a-zA-Z0-9]+)((?:\/[-_a-zA-Z0-9]+)+)\/([0-9]+).*$/;
 
 /**

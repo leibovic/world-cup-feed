@@ -3,6 +3,7 @@
 
     <Description about="urn:mozilla:install-manifest">
         <em:id>world.cup.feed@mozilla.org</em:id>
+        <em:unpack>true</em:unpack>
         <em:type>2</em:type>
         <em:name>World Cup Feed</em:name>
         <em:version>1.0</em:version>
