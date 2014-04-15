@@ -170,19 +170,18 @@ function observe(doc, topic, id) {
   let setting = doc.getElementById("country-setting");
   setting.setAttribute("title", Strings.GetStringFromName("country"));
 
-  let menupopup = doc.getElementById("country-menupopup");
+  let select = doc.getElementById("country-select");
   for (let code in Countries) {
-    let menuitem = doc.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "menuitem"); 
-    menuitem.setAttribute("value", code);
-    menuitem.setAttribute("label", Countries[code].label);
-    menupopup.appendChild(menuitem);
+    let option = doc.createElement("option");
+    option.value = code;
+    option.textContent = Countries[code].label;
+    select.appendChild(option);
   }
 
-  let menulist = doc.getElementById("country-menulist");
-  menulist.setAttribute("value", getCountryCode());
+  select.value = getCountryCode();
 
-  menulist.addEventListener("command", function() {
-    let newCountryCode = menulist.value;
+  select.addEventListener("change", function() {
+    let newCountryCode = select.value;
     Services.prefs.setCharPref(WCF_COUNTRY_CODE_PREF, newCountryCode);
     HomeProvider.requestSync(DATASET_ID, refreshDataset);
   }, false);
