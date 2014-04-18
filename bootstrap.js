@@ -109,7 +109,8 @@ function optionsCallback() {
     title: Strings.GetStringFromName("title"),
     views: [{
       type: Home.panels.View.LIST,
-      dataset: DATASET_ID
+      dataset: DATASET_ID,
+      onrefresh: refreshDataset
     }]
   };
 }
