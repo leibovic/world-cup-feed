@@ -147,19 +147,23 @@ function refreshDataset() {
       return item;
     });
 
-    Task.spawn(function() {
-      let storage = HomeProvider.getStorage(DATASET_ID);
-      yield storage.deleteAll();
-      yield storage.save(items);
-    }).then(null, e => Cu.reportError("Error saving data to HomeProvider: " + e));
+    HomeProvider.requestSync(DATASET_ID, function() {
+      Task.spawn(function() {
+        let storage = HomeProvider.getStorage(DATASET_ID);
+        yield storage.deleteAll();
+        yield storage.save(items);
+      }).then(null, e => Cu.reportError("Error saving data to HomeProvider: " + e));
+    });
   });
 }
 
 function deleteDataset() {
-  Task.spawn(function() {
-    let storage = HomeProvider.getStorage(DATASET_ID);
-    yield storage.deleteAll();
-  }).then(null, e => Cu.reportError("Error deleting data from HomeProvider: " + e));
+  HomeProvider.requestSync(DATASET_ID, function() {
+    Task.spawn(function() {
+      let storage = HomeProvider.getStorage(DATASET_ID);
+      yield storage.deleteAll();
+    }).then(null, e => Cu.reportError("Error deleting data from HomeProvider: " + e));
+  });
 }
 
 function observe(doc, topic, id) {
