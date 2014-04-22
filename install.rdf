@@ -5,10 +5,10 @@
         <em:id>world.cup.feed@mozilla.org</em:id>
         <em:unpack>true</em:unpack>
         <em:type>2</em:type>
-        <em:name>World Cup Feed</em:name>
+        <em:name>Goal.com Feed</em:name>
         <em:version>1.0</em:version>
         <em:bootstrap>true</em:bootstrap>
-        <em:description>Adds a World Cup feed to your Firefox for Android homepage.</em:description>
+        <em:description>Adds a Goal.com feed to your Firefox for Android homepage.</em:description>
         <em:creator>Margaret Leibovic</em:creator>
 
         <!-- Mobile -->

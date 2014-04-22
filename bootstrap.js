@@ -3,6 +3,7 @@ const { classes: Cc, interfaces: Ci, utils: Cu } = Components;
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/Home.jsm");
 Cu.import("resource://gre/modules/HomeProvider.jsm");
+Cu.import("resource://gre/modules/Prompt.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/Task.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -114,8 +115,6 @@ function optionsCallback() {
   };
 }
 
-const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([-_a-zA-Z0-9]+)((?:\/[-_a-zA-Z0-9]+)+)\/([0-9]+).*$/;
-
 /**
  * Takes a desktop goal.com URL and converts it into a mobile URL.
  *   e.g. "http://www.goal.com/en-us/news/88/spain/2014/03/27/4713470/del-bosque-silent-on-valdes-replacement"
@@ -126,6 +125,8 @@ const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([-_a-zA-Z0-9]+)((?:\/[
  *   "www.", "goal.com", "en-us", "news", "/88/spain/2014/03/27", "4713470" ]
  */
 function mobilifyUrl(url) {
+  const REGEX = /^http:\/\/(www\.)?([^/]+)\/([-_a-zA-Z]+)\/([-_a-zA-Z0-9]+)((?:\/[-_a-zA-Z0-9]+)+)\/([0-9]+).*$/;
+
   try {
     let match = url.match(REGEX);
     return "http://m." + match[2] + "/s/" + match[3] + "/" + match[4] + "/" + match[6] + "/";
@@ -162,6 +163,9 @@ function deleteDataset() {
   }).then(null, e => Cu.reportError("Error deleting data from HomeProvider: " + e));
 }
 
+/**
+ * Observes AddonManager.OPTIONS_NOTIFICATION_DISPLAYED notification.
+ */
 function observe(doc, topic, id) {
   if (id != ADDON_ID) {
     return;
@@ -188,6 +192,53 @@ function observe(doc, topic, id) {
 }
 
 /**
+ * Opens feed panel and prompts user to choose a country.
+ */
+function showCountryPrompt() {
+  // Open about:home to feed panel.
+  let win = Services.wm.getMostRecentWindow("navigator:browser");
+  win.BrowserApp.loadURI("about:home?panel=" + PANEL_ID);
+
+  let defaultCode = getCountryCode();
+  let items = [];
+
+  for (let code in Countries) {
+    let item = {
+      label: Countries[code].label,
+      code: code
+    };
+    if (code === defaultCode) {
+      item.selected = true;
+    }
+    items.push(item);
+  }
+
+  // Show list in alphabetical order.
+  items.sort(function compare(a, b) {
+    if (a.label < b.label) {
+      return -1;
+    }
+    if (a.label > b.label) {
+      return 1;
+    }
+    return 0;
+  });
+
+  let p = new Prompt({
+    title: Strings.GetStringFromName("countryPrompt.message")
+  }).setSingleChoiceItems(items).show(function (data) {
+    // Store the user's preference if they chose a country.
+    if (data.button > -1) {
+      let code = items[data.button].code;
+      Services.prefs.setCharPref(WCF_COUNTRY_CODE_PREF, code);
+    }
+
+    // Fetch items for the country.
+    refreshDataset();
+  });
+}
+
+/**
  * bootstrap.js API
  * https://developer.mozilla.org/en-US/Add-ons/Bootstrapped_extensions
  */
@@ -197,8 +248,9 @@ function startup(data, reason) {
 
   switch(reason) {
     case ADDON_INSTALL:
+    case ADDON_ENABLE:
       Home.panels.install(PANEL_ID);
-      HomeProvider.requestSync(DATASET_ID, refreshDataset);
+      showCountryPrompt();
       break;
 
     case ADDON_UPGRADE:
@@ -218,6 +270,7 @@ function shutdown(data, reason) {
     Home.panels.uninstall(PANEL_ID);
     HomeProvider.removePeriodicSync(DATASET_ID);
     deleteDataset();
+    Services.prefs.clearUserPref(WCF_COUNTRY_CODE_PREF);
   }
 
   Home.panels.unregister(PANEL_ID);
