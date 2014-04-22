@@ -199,40 +199,34 @@ function showCountryPrompt() {
   let win = Services.wm.getMostRecentWindow("navigator:browser");
   win.BrowserApp.loadURI("about:home?panel=" + PANEL_ID);
 
-  let defaultCode = getCountryCode();
-  let items = [];
+  let values = [];
 
   for (let code in Countries) {
-    let item = {
-      label: Countries[code].label,
-      code: code
-    };
-    if (code === defaultCode) {
-      item.selected = true;
-    }
-    items.push(item);
+    values.push(Countries[code].label);
   }
 
   // Show list in alphabetical order.
-  items.sort(function compare(a, b) {
-    if (a.label < b.label) {
-      return -1;
-    }
-    if (a.label > b.label) {
-      return 1;
-    }
-    return 0;
-  });
+  values.sort();
+
+  values.unshift(Strings.GetStringFromName("countryPrompt.selectOne"));
 
   let p = new Prompt({
-    title: Strings.GetStringFromName("countryPrompt.message")
-  }).setSingleChoiceItems(items).show(function (data) {
+    title: Strings.GetStringFromName("countryPrompt.title"),
+    message: Strings.GetStringFromName("countryPrompt.message"),
+    buttons: [Strings.GetStringFromName("countryPrompt.ok")]
+  }).addMenulist({
+    values: values
+  }).show(function (data) {
     // Store the user's preference if they chose a country.
-    if (data.button > -1) {
-      let code = items[data.button].code;
-      Services.prefs.setCharPref(WCF_COUNTRY_CODE_PREF, code);
+    if (data.menulist0 > 0) {
+      let label = values[data.menulist0];
+      for (let code in Countries) {
+        if (Countries[code].label === label) {
+          Services.prefs.setCharPref(WCF_COUNTRY_CODE_PREF, code);
+          break;
+        }
+      }
     }
-
     // Fetch items for the country.
     refreshDataset();
   });
