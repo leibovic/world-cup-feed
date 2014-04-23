@@ -2,8 +2,8 @@
 
 <vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       xmlns:html="http://www.w3.org/1999/xhtml">
-  <setting id="country-setting" type="control">
-    <html:select id="country-select">
+  <setting id="edition-setting" type="control">
+    <html:select id="edition-select">
     </html:select>
   </setting>
 </vbox>

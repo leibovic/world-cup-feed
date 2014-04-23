@@ -13,7 +13,7 @@ const PANEL_ID = "world.cup.feed.panel@mozilla.org";
 const DATASET_ID = "world.cup.feed.dataset@mozilla.org";
 
 const SNIPPETS_COUNTRY_CODE_PREF = "browser.snippets.countryCode";
-const WCF_COUNTRY_CODE_PREF = "worldCupFeed.countryCode";
+const FEED_EDITION_PREF = "worldCupFeed.feedEdition";
 
 XPCOMUtils.defineLazyGetter(this, "Strings", function() {
   return Services.strings.createBundle("chrome://worldcupfeed/locale/worldcupfeed.properties");
@@ -23,91 +23,113 @@ XPCOMUtils.defineLazyGetter(this, "RegionNames", function() {
   return Services.strings.createBundle("chrome://global/locale/regionNames.properties");
 });
 
+XPCOMUtils.defineLazyGetter(this, "LanguageNames", function() {
+  return Services.strings.createBundle("chrome://global/locale/languageNames.properties");
+});
+
 XPCOMUtils.defineLazyGetter(this, "FeedHelper", function() {
   let sandbox = {};
   Services.scriptloader.loadSubScript("chrome://worldcupfeed/content/FeedHelper.js", sandbox);
   return sandbox["FeedHelper"];
 });
 
-var Countries = {
+var FeedEditions = {
   AR: {
-    label: RegionNames.GetStringFromName("ar"),
+    lang: "es",
+    region: "ar",
     feed: "http://www.goal.com/es-ar/feeds/news?fmt=rss&ICID=HP"
   },
   MX: {
-    label: RegionNames.GetStringFromName("mx"),
+    lang: "es",
+    region: "mx",
     feed: "http://www.goal.com/es-mx/feeds/news?fmt=rss&ICID=HP"
   },
   CO: {
-    label: RegionNames.GetStringFromName("co"),
+    lang: "es",
+    region: "co",
     feed: "http://www.goal.com/es-co/feeds/news?fmt=rss&ICID=HP"
   },
   CL: {
-    label: RegionNames.GetStringFromName("cl"),
+    lang: "es",
+    region: "cl",
     feed: "http://www.goal.com/es-cl/feeds/news?fmt=rss&ICID=HP"
   },
   BR: {
-    label: RegionNames.GetStringFromName("br"),
+    lang: "pt",
+    region: "br",
     feed: "http://www.goal.com/br/feeds/news?fmt=rss&ICID=HP"
   },
   DE: {
-    label: RegionNames.GetStringFromName("de"),
+    lang: "de",
     feed: "http://www.goal.com/de/feeds/news?fmt=rss&ICID=HP"
   },
   ES: {
-    label: RegionNames.GetStringFromName("es"),
+    lang: "es",
+    region: "es",
     feed: "http://www.goal.com/es/feeds/news?fmt=rss&ICID=HP"
   },
   GB: {
-    label: RegionNames.GetStringFromName("gb"),
+    lang: "en",
+    region: "gb",
     feed: "http://www.goal.com/en-gb/feeds/news?fmt=rss&ICID=HP"
   },
   IT: {
-    label: RegionNames.GetStringFromName("it"),
+    lang: "it",
     feed: "http://www.goal.com/it/feeds/news?fmt=rss&ICID=HP"
   },
   FR: {
-    label: RegionNames.GetStringFromName("fr"),
+    lang: "fr",
     feed: "http://www.goal.com/fr/feeds/news?fmt=rss&ICID=HP"
   },
   US: {
-    label: RegionNames.GetStringFromName("us"),
+    lang: "en",
+    region: "us",
     feed: "http://www.goal.com/en-us/feeds/news?fmt=rss&ICID=HP"
   },
   ID: {
-    label: RegionNames.GetStringFromName("id"),
+    lang: "id",
     feed: "http://www.goal.com/id/feeds/news?fmt=rss&ICID=HP"
   },
   IN: {
-    label: RegionNames.GetStringFromName("in"),
+    lang: "en",
+    region: "in",
     feed: "http://www.goal.com/en-india/feeds/news?fmt=rss&ICID=HP"
   }
 };
 
-function getCountryCode() {
+function formatLabel(edition) {
+  let langLabel = LanguageNames.GetStringFromName(edition.lang);
+  if (edition.region) {
+    let regionLabel = RegionNames.GetStringFromName(edition.region);
+    return Strings.formatStringFromName("feedEdition.labelFormat", [langLabel, regionLabel], 2);
+  }
+  return langLabel;
+}
+
+function getFeedEdition() {
   try {
     // First check to see if the user has set a pref for this add-on.
-    let code = Services.prefs.getCharPref(WCF_COUNTRY_CODE_PREF);
-    if (code in Countries) {
-      return code;
+    let key = Services.prefs.getCharPref(FEED_EDITION_PREF);
+    if (key in FeedEditions) {
+      return key;
     }
   } catch (e) {}
 
   try {
     // Next, check to see if there's a country code set by snippets.
-    let code = Services.prefs.getCharPref(SNIPPETS_COUNTRY_CODE_PREF);
-    if (code in Countries) {
-      return code;
+    let key = Services.prefs.getCharPref(FEED_EDITION_PREF);
+    if (key in FeedEditions) {
+      return key;
     }
   } catch (e) {}
 
-  // XXX: Choose a fallback country based on the locale.
+  // XXX: Choose a default edition based on the locale.
   return "US";
 }
 
 function optionsCallback() {
   return {
-    title: Strings.GetStringFromName("title"),
+    title: Strings.GetStringFromName("panel.title"),
     views: [{
       type: Home.panels.View.LIST,
       dataset: DATASET_ID
@@ -138,8 +160,8 @@ function mobilifyUrl(url) {
 }
 
 function refreshDataset() {
-  let code = getCountryCode();
-  let feedUrl = Countries[code].feed;
+  let key = getFeedEdition();
+  let feedUrl = FeedEditions[key].feed;
 
   FeedHelper.parseFeed(feedUrl, function(parsedFeed) {
     let items = FeedHelper.feedToItems(parsedFeed).map(function(item){
@@ -171,63 +193,88 @@ function observe(doc, topic, id) {
     return;
   }
 
-  let setting = doc.getElementById("country-setting");
-  setting.setAttribute("title", Strings.GetStringFromName("country"));
+  let setting = doc.getElementById("edition-setting");
+  setting.setAttribute("title", Strings.GetStringFromName("feedEdition.label"));
 
-  let select = doc.getElementById("country-select");
-  for (let code in Countries) {
+  let options = [];
+  for (let key in FeedEditions) {
     let option = doc.createElement("option");
-    option.value = code;
-    option.textContent = Countries[code].label;
-    select.appendChild(option);
+    option.value = key;
+    option.textContent = formatLabel(FeedEditions[key]);
+    options.push(option);
   }
 
-  select.value = getCountryCode();
+  // Show options in alphabetical order.
+  options.sort(function(a, b) {
+    if (a.textContent < b.textContent) {
+      return -1;
+    }
+    if (a.textContent > b.textContent) {
+      return 1;
+    }
+    return 0;
+  });
+
+  let select = doc.getElementById("edition-select");
+  options.forEach(function (option) {
+    select.appendChild(option);
+  });
+
+  select.value = getFeedEdition();
 
   select.addEventListener("change", function() {
-    let newCountryCode = select.value;
-    Services.prefs.setCharPref(WCF_COUNTRY_CODE_PREF, newCountryCode);
+    Services.prefs.setCharPref(FEED_EDITION_PREF, select.value);
     HomeProvider.requestSync(DATASET_ID, refreshDataset);
   }, false);
 }
 
 /**
- * Opens feed panel and prompts user to choose a country.
+ * Opens feed panel and prompts user to choose a feed edition.
  */
-function showCountryPrompt() {
+function showFeedEditionPrompt() {
   // Open about:home to feed panel.
   let win = Services.wm.getMostRecentWindow("navigator:browser");
   win.BrowserApp.loadURI("about:home?panel=" + PANEL_ID);
 
+  // Array of edition options to show in menulist.
   let values = [];
 
-  for (let code in Countries) {
-    values.push(Countries[code].label);
+  let defaultEdition = getFeedEdition();
+  let defaultValue;
+
+  for (let key in FeedEditions) {
+    let label = formatLabel(FeedEditions[key]);
+    if (key == defaultEdition) {
+      // Store the default label to put at the front of the array.
+      defaultValue = label;
+    } else {
+      values.push(label);
+    }
   }
 
-  // Show list in alphabetical order.
+  // Show non-default values in alphabetical order.
   values.sort();
 
-  values.unshift(Strings.GetStringFromName("countryPrompt.selectOne"));
+  // Put default edition at the front of the array so it displays first.
+  values.unshift(defaultValue);
 
   let p = new Prompt({
-    title: Strings.GetStringFromName("countryPrompt.title"),
-    message: Strings.GetStringFromName("countryPrompt.message"),
-    buttons: [Strings.GetStringFromName("countryPrompt.ok")]
+    title: Strings.GetStringFromName("prompt.title"),
+    message: Strings.GetStringFromName("prompt.message"),
+    buttons: [Strings.GetStringFromName("prompt.ok")]
   }).addMenulist({
     values: values
   }).show(function (data) {
-    // Store the user's preference if they chose a country.
+    // Store the user's preference if they chose a feed edition.
     if (data.menulist0 > 0) {
       let label = values[data.menulist0];
-      for (let code in Countries) {
-        if (Countries[code].label === label) {
-          Services.prefs.setCharPref(WCF_COUNTRY_CODE_PREF, code);
+      for (let key in FeedEditions) {
+        if (formatLabel(FeedEditions[key]) == label) {
+          Services.prefs.setCharPref(FEED_EDITION_PREF, key);
           break;
         }
       }
     }
-    // Fetch items for the country.
     refreshDataset();
   });
 }
@@ -244,7 +291,7 @@ function startup(data, reason) {
     case ADDON_INSTALL:
     case ADDON_ENABLE:
       Home.panels.install(PANEL_ID);
-      showCountryPrompt();
+      showFeedEditionPrompt();
       break;
 
     case ADDON_UPGRADE:
@@ -264,7 +311,7 @@ function shutdown(data, reason) {
     Home.panels.uninstall(PANEL_ID);
     HomeProvider.removePeriodicSync(DATASET_ID);
     deleteDataset();
-    Services.prefs.clearUserPref(WCF_COUNTRY_CODE_PREF);
+    Services.prefs.clearUserPref(FEED_EDITION_PREF);
   }
 
   Home.panels.unregister(PANEL_ID);
