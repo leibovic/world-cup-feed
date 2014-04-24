@@ -12,8 +12,8 @@ const ADDON_ID = "world.cup.feed@mozilla.org";
 const PANEL_ID = "world.cup.feed.panel@mozilla.org";
 const DATASET_ID = "world.cup.feed.dataset@mozilla.org";
 
-const SNIPPETS_COUNTRY_CODE_PREF = "browser.snippets.countryCode";
 const FEED_EDITION_PREF = "worldCupFeed.feedEdition";
+const SNIPPETS_COUNTRY_CODE_PREF = "browser.snippets.countryCode";
 
 XPCOMUtils.defineLazyGetter(this, "Strings", function() {
   return Services.strings.createBundle("chrome://worldcupfeed/locale/worldcupfeed.properties");
@@ -23,10 +23,6 @@ XPCOMUtils.defineLazyGetter(this, "RegionNames", function() {
   return Services.strings.createBundle("chrome://global/locale/regionNames.properties");
 });
 
-XPCOMUtils.defineLazyGetter(this, "LanguageNames", function() {
-  return Services.strings.createBundle("chrome://global/locale/languageNames.properties");
-});
-
 XPCOMUtils.defineLazyGetter(this, "FeedHelper", function() {
   let sandbox = {};
   Services.scriptloader.loadSubScript("chrome://worldcupfeed/content/FeedHelper.js", sandbox);
@@ -34,77 +30,91 @@ XPCOMUtils.defineLazyGetter(this, "FeedHelper", function() {
 });
 
 var FeedEditions = {
+  INTL: {
+    get label() {
+      return Strings.GetStringFromName("feedEdition.international");
+    },
+    feed: "http://www.goal.com/en/feeds/news?fmt=rss&ICID=HP"
+  },
   AR: {
-    lang: "es",
-    region: "ar",
+    get label() {
+      return RegionNames.GetStringFromName("ar");
+    },
     feed: "http://www.goal.com/es-ar/feeds/news?fmt=rss&ICID=HP"
   },
   MX: {
-    lang: "es",
-    region: "mx",
+    get label() {
+      return RegionNames.GetStringFromName("mx");
+    },
     feed: "http://www.goal.com/es-mx/feeds/news?fmt=rss&ICID=HP"
   },
   CO: {
-    lang: "es",
-    region: "co",
+    get label() {
+      return RegionNames.GetStringFromName("co");
+    },
     feed: "http://www.goal.com/es-co/feeds/news?fmt=rss&ICID=HP"
   },
   CL: {
-    lang: "es",
-    region: "cl",
+    get label() {
+      return RegionNames.GetStringFromName("cl");
+    },
     feed: "http://www.goal.com/es-cl/feeds/news?fmt=rss&ICID=HP"
   },
   BR: {
-    lang: "pt",
-    region: "br",
+    get label() {
+      return RegionNames.GetStringFromName("br");
+    },
     feed: "http://www.goal.com/br/feeds/news?fmt=rss&ICID=HP"
   },
   DE: {
-    lang: "de",
+    get label() {
+      return RegionNames.GetStringFromName("de");
+    },
     feed: "http://www.goal.com/de/feeds/news?fmt=rss&ICID=HP"
   },
   ES: {
-    lang: "es",
-    region: "es",
+    get label() {
+      return RegionNames.GetStringFromName("es");
+    },
     feed: "http://www.goal.com/es/feeds/news?fmt=rss&ICID=HP"
   },
   GB: {
-    lang: "en",
-    region: "gb",
+    get label() {
+      return RegionNames.GetStringFromName("gb");
+    },
     feed: "http://www.goal.com/en-gb/feeds/news?fmt=rss&ICID=HP"
   },
   IT: {
-    lang: "it",
+    get label() {
+      return RegionNames.GetStringFromName("it");
+    },
     feed: "http://www.goal.com/it/feeds/news?fmt=rss&ICID=HP"
   },
   FR: {
-    lang: "fr",
+    get label() {
+      return RegionNames.GetStringFromName("fr");
+    },
     feed: "http://www.goal.com/fr/feeds/news?fmt=rss&ICID=HP"
   },
   US: {
-    lang: "en",
-    region: "us",
+    get label() {
+      return RegionNames.GetStringFromName("us");
+    },
     feed: "http://www.goal.com/en-us/feeds/news?fmt=rss&ICID=HP"
   },
   ID: {
-    lang: "id",
+    get label() {
+      return RegionNames.GetStringFromName("id");
+    },
     feed: "http://www.goal.com/id/feeds/news?fmt=rss&ICID=HP"
   },
   IN: {
-    lang: "en",
-    region: "in",
+    get label() {
+      return RegionNames.GetStringFromName("in");
+    },
     feed: "http://www.goal.com/en-india/feeds/news?fmt=rss&ICID=HP"
   }
 };
-
-function formatLabel(edition) {
-  let langLabel = LanguageNames.GetStringFromName(edition.lang);
-  if (edition.region) {
-    let regionLabel = RegionNames.GetStringFromName(edition.region);
-    return Strings.formatStringFromName("feedEdition.labelFormat", [langLabel, regionLabel], 2);
-  }
-  return langLabel;
-}
 
 function getFeedEdition() {
   try {
@@ -117,14 +127,14 @@ function getFeedEdition() {
 
   try {
     // Next, check to see if there's a country code set by snippets.
-    let key = Services.prefs.getCharPref(FEED_EDITION_PREF);
+    let key = Services.prefs.getCharPref(SNIPPETS_COUNTRY_CODE_PREF);
     if (key in FeedEditions) {
       return key;
     }
   } catch (e) {}
 
-  // XXX: Choose a default edition based on the locale.
-  return "US";
+  // Default to the international edition.
+  return "INTL";
 }
 
 function optionsCallback() {
@@ -200,7 +210,7 @@ function observe(doc, topic, id) {
   for (let key in FeedEditions) {
     let option = doc.createElement("option");
     option.value = key;
-    option.textContent = formatLabel(FeedEditions[key]);
+    option.textContent = FeedEditions[key].label;
     options.push(option);
   }
 
@@ -243,7 +253,7 @@ function showFeedEditionPrompt() {
   let defaultValue;
 
   for (let key in FeedEditions) {
-    let label = formatLabel(FeedEditions[key]);
+    let label = FeedEditions[key].label;
     if (key == defaultEdition) {
       // Store the default label to put at the front of the array.
       defaultValue = label;
@@ -269,7 +279,7 @@ function showFeedEditionPrompt() {
     if (data.menulist0 > 0) {
       let label = values[data.menulist0];
       for (let key in FeedEditions) {
-        if (formatLabel(FeedEditions[key]) == label) {
+        if (FeedEditions[key].label == label) {
           Services.prefs.setCharPref(FEED_EDITION_PREF, key);
           break;
         }
