@@ -139,7 +139,7 @@ function getFeedEdition() {
 
 function optionsCallback() {
   return {
-    title: Strings.GetStringFromName("panel.title"),
+    title: "goal.com",
     views: [{
       type: Home.panels.View.LIST,
       dataset: DATASET_ID
