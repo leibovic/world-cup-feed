@@ -236,6 +236,10 @@ function observe(doc, topic, id) {
     Services.prefs.setCharPref(FEED_EDITION_PREF, select.value);
     HomeProvider.requestSync(DATASET_ID, refreshDataset);
   }, false);
+
+  let link = doc.getElementById("sumo-link");
+  link.href = "https://support.mozilla.org";
+  link.textContent = Strings.GetStringFromName("settings.help");
 }
 
 /**

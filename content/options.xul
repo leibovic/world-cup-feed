@@ -6,4 +6,8 @@
     <html:select id="edition-select">
     </html:select>
   </setting>
+  <setting type="control">
+    <html:a id="sumo-link">
+    </html:a>
+  </setting>
 </vbox>
