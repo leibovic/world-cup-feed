@@ -106,7 +106,7 @@ var FeedEditions = {
     get label() {
       return RegionNames.GetStringFromName("id");
     },
-    feed: "http://www.goal.com/id/feeds/news?fmt=rss&ICID=HP"
+    feed: "http://www.goal.com/id-ID/feeds/news?fmt=rss&ICID=HP"
   },
   IN: {
     get label() {
