@@ -1,3 +1,4 @@
-content    worldcupfeed          content/
-locale     worldcupfeed en-US    locale/en-US/
-locale     worldcupfeed fr       locale/fr/
+content       worldcupfeed  content/
+locale        worldcupfeed  de            locale/de/
+locale        worldcupfeed  en-US         locale/en-US/
+locale        worldcupfeed  es-ES         locale/es-ES/
