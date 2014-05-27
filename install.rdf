@@ -24,6 +24,13 @@
             <em:description>Añade un canal de Goal.com a la página de inicio de Firefox para Android.</em:description>
           </Description>
         </em:localized>
+        <em:localized>
+          <Description>
+            <em:locale>fr</em:locale>
+            <em:name>Goal.com Feed</em:name>
+            <em:description>Ajoute un flux Goal.com à votre page d'accueil Firefox pour Android.</em:description>
+          </Description>
+        </em:localized>
 
         <!-- Mobile -->
         <em:targetApplication>
