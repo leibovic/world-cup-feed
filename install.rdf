@@ -33,6 +33,13 @@
         </em:localized>
         <em:localized>
           <Description>
+            <em:locale>id</em:locale>
+            <em:name>Goal.com Feed</em:name>
+            <em:description>Tambahkan umpan Goal.com ke beranda Firefox for Android Anda.</em:description>
+          </Description>
+        </em:localized>
+        <em:localized>
+          <Description>
             <em:locale>it</em:locale>
             <em:name>Goal.com Feed</em:name>
             <em:description>Aggiunge le ultime notizie del sito Goal.com alla pagina iniziale di Firefox per Android.</em:description>
