@@ -3,3 +3,5 @@ locale        worldcupfeed  de            locale/de/
 locale        worldcupfeed  en-US         locale/en-US/
 locale        worldcupfeed  es-ES         locale/es-ES/
 locale        worldcupfeed  fr            locale/fr/
+locale        worldcupfeed  it            locale/it/
+locale        worldcupfeed  pt-BR         locale/pt-BR/

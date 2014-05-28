@@ -31,6 +31,20 @@
             <em:description>Ajoute un flux Goal.com à votre page d'accueil Firefox pour Android.</em:description>
           </Description>
         </em:localized>
+        <em:localized>
+          <Description>
+            <em:locale>it</em:locale>
+            <em:name>Goal.com Feed</em:name>
+            <em:description>Aggiunge le ultime notizie del sito Goal.com alla pagina iniziale di Firefox per Android.</em:description>
+          </Description>
+        </em:localized>
+        <em:localized>
+          <Description>
+            <em:locale>pt-BR</em:locale>
+            <em:name>Goal.com Feed</em:name>
+            <em:description>Adiciona uma lista de notícias do Goal.com à página inicial do seu Firefox para Android.</em:description>
+          </Description>
+        </em:localized>
 
         <!-- Mobile -->
         <em:targetApplication>
