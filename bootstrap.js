@@ -142,7 +142,8 @@ function optionsCallback() {
     title: "goal.com",
     views: [{
       type: Home.panels.View.LIST,
-      dataset: DATASET_ID
+      dataset: DATASET_ID,
+      onrefresh: refreshDataset
     }]
   };
 }
