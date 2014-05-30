@@ -47,6 +47,13 @@
         </em:localized>
         <em:localized>
           <Description>
+            <em:locale>ja</em:locale>
+            <em:name>Goal.com Feed</em:name>
+            <em:description>Android 版 Firefox のホーム画面に Goal.com のフィードを追加する。</em:description>
+          </Description>
+        </em:localized>
+        <em:localized>
+          <Description>
             <em:locale>pt-BR</em:locale>
             <em:name>Goal.com Feed</em:name>
             <em:description>Adiciona uma lista de notícias do Goal.com à página inicial do seu Firefox para Android.</em:description>
