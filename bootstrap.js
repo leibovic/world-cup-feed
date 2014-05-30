@@ -113,6 +113,12 @@ var FeedEditions = {
       return RegionNames.GetStringFromName("in");
     },
     feed: "http://www.goal.com/en-india/feeds/news?fmt=rss&ICID=HP"
+  },
+  JA: {
+    get label() {
+      return RegionNames.GetStringFromName("jp");
+    },
+    feed: "http://www.goal.com/jp/feeds/news?fmt=rss&ICID=HP"
   }
 };
 
